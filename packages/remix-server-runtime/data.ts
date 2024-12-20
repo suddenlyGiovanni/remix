@@ -7,13 +7,16 @@ import {
 } from "./responses";
 import type {
   ActionFunction,
-  DataFunctionArgs,
+  ActionFunctionArgs,
   LoaderFunction,
+  LoaderFunctionArgs,
 } from "./routeModules";
 
 /**
  * An object of unknown type for route loaders and actions provided by the
- * server's `getLoadContext()` function.
+ * server's `getLoadContext()` function.  This is defined as an empty interface
+ * specifically so apps can leverage declaration merging to augment this type
+ * globally: https://www.typescriptlang.org/docs/handbook/declaration-merging.html
  */
 export interface AppLoadContext {
   [key: string]: unknown;
@@ -22,23 +25,27 @@ export interface AppLoadContext {
 /**
  * Data for a route that was returned from a `loader()`.
  */
-export type AppData = any;
+export type AppData = unknown;
 
-export async function callRouteActionRR({
+export async function callRouteAction({
   loadContext,
   action,
   params,
   request,
   routeId,
+  singleFetch,
 }: {
   request: Request;
   action: ActionFunction;
-  params: DataFunctionArgs["params"];
+  params: ActionFunctionArgs["params"];
   loadContext: AppLoadContext;
   routeId: string;
+  singleFetch: boolean;
 }) {
   let result = await action({
-    request: stripDataParam(stripIndexParam(request)),
+    request: singleFetch
+      ? stripRoutesParam(stripIndexParam(request))
+      : stripDataParam(stripIndexParam(request)),
     context: loadContext,
     params,
   });
@@ -50,24 +57,33 @@ export async function callRouteActionRR({
     );
   }
 
+  // Allow naked object returns when single fetch is enabled
+  if (singleFetch) {
+    return result;
+  }
+
   return isResponse(result) ? result : json(result);
 }
 
-export async function callRouteLoaderRR({
+export async function callRouteLoader({
   loadContext,
   loader,
   params,
   request,
   routeId,
+  singleFetch,
 }: {
   request: Request;
   loader: LoaderFunction;
-  params: DataFunctionArgs["params"];
+  params: LoaderFunctionArgs["params"];
   loadContext: AppLoadContext;
   routeId: string;
+  singleFetch: boolean;
 }) {
   let result = await loader({
-    request: stripDataParam(stripIndexParam(request)),
+    request: singleFetch
+      ? stripRoutesParam(stripIndexParam(request))
+      : stripDataParam(stripIndexParam(request)),
     context: loadContext,
     params,
   });
@@ -86,6 +102,11 @@ export async function callRouteLoaderRR({
         result.init
       );
     }
+    return result;
+  }
+
+  // Allow naked object returns when single fetch is enabled
+  if (singleFetch) {
     return result;
   }
 
@@ -111,11 +132,50 @@ function stripIndexParam(request: Request) {
     url.searchParams.append("index", toKeep);
   }
 
-  return new Request(url.href, request);
+  let init: RequestInit = {
+    method: request.method,
+    body: request.body,
+    headers: request.headers,
+    signal: request.signal,
+  };
+
+  if (init.body) {
+    (init as { duplex: "half" }).duplex = "half";
+  }
+
+  return new Request(url.href, init);
 }
 
 function stripDataParam(request: Request) {
   let url = new URL(request.url);
   url.searchParams.delete("_data");
-  return new Request(url.href, request);
+  let init: RequestInit = {
+    method: request.method,
+    body: request.body,
+    headers: request.headers,
+    signal: request.signal,
+  };
+
+  if (init.body) {
+    (init as { duplex: "half" }).duplex = "half";
+  }
+
+  return new Request(url.href, init);
+}
+
+function stripRoutesParam(request: Request) {
+  let url = new URL(request.url);
+  url.searchParams.delete("_routes");
+  let init: RequestInit = {
+    method: request.method,
+    body: request.body,
+    headers: request.headers,
+    signal: request.signal,
+  };
+
+  if (init.body) {
+    (init as { duplex: "half" }).duplex = "half";
+  }
+
+  return new Request(url.href, init);
 }

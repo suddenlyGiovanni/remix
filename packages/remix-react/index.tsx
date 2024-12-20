@@ -1,27 +1,48 @@
-export type { RemixBrowserProps } from "./browser";
-export { RemixBrowser } from "./browser";
 export type {
-  FormProps,
+  ErrorResponse,
+  Fetcher,
+  FetcherWithComponents,
+  FormEncType,
+  FormMethod,
   Location,
   NavigateFunction,
+  Navigation,
   Params,
   Path,
   ShouldRevalidateFunction,
+  ShouldRevalidateFunctionArgs,
   SubmitFunction,
   SubmitOptions,
-  unstable_Blocker,
-  unstable_BlockerFunction,
+  Blocker,
+  BlockerFunction,
 } from "react-router-dom";
 export {
-  Form,
+  createPath,
+  createRoutesFromChildren,
+  createRoutesFromElements,
+  createSearchParams,
+  generatePath,
+  matchPath,
+  matchRoutes,
+  parsePath,
+  renderMatches,
+  resolvePath,
+  Navigate,
+  NavigationType,
   Outlet,
+  Route,
+  Routes,
   useAsyncError,
   useAsyncValue,
   isRouteErrorResponse,
   useBeforeUnload,
+  useFetchers,
   useFormAction,
   useHref,
+  useInRouterContext,
+  useLinkClickHandler,
   useLocation,
+  useMatch,
   useNavigate,
   useNavigation,
   useNavigationType,
@@ -31,57 +52,67 @@ export {
   useResolvedPath,
   useRevalidator,
   useRouteError,
-  useRouteLoaderData,
+  useRoutes,
   useSearchParams,
   useSubmit,
-  unstable_useBlocker,
+  useBlocker,
+  useViewTransitionState,
   unstable_usePrompt,
 } from "react-router-dom";
+export {
+  // For use in clientLoader/clientAction
+  defer,
+  json,
+  redirect,
+  redirectDocument,
+  replace,
+  data,
+} from "@remix-run/server-runtime";
 
+export type { RemixBrowserProps } from "./browser";
+export { RemixBrowser } from "./browser";
 export type {
   AwaitProps,
-  FetcherWithComponents,
-  RouteMatch,
+  RemixFormProps as FormProps,
   RemixNavLinkProps as NavLinkProps,
   RemixLinkProps as LinkProps,
+  UIMatch,
 } from "./components";
 export {
   Await,
   Meta,
   Links,
   Scripts,
+  Form,
   Link,
   NavLink,
   PrefetchPageLinks,
   LiveReload,
-  useTransition,
   useFetcher,
-  useFetchers,
   useLoaderData,
-  useMatches,
+  useRouteLoaderData,
   useActionData,
+  useMatches,
   RemixContext as UNSAFE_RemixContext,
 } from "./components";
 
-export type { FormMethod, FormEncType } from "./data";
-
-export type { ThrownResponse } from "./errors";
-export { useCatch } from "./errorBoundaries";
-
 export type { HtmlLinkDescriptor } from "./links";
 export type {
-  CatchBoundaryComponent,
-  HtmlMetaDescriptor,
+  ClientActionFunction,
+  ClientActionFunctionArgs,
+  ClientLoaderFunction,
+  ClientLoaderFunctionArgs,
+  MetaArgs,
+  MetaMatch as UNSAFE_MetaMatch,
+  MetaDescriptor,
+  MetaFunction,
   RouteModules as UNSAFE_RouteModules,
-  ShouldReloadFunction,
 } from "./routeModules";
 
 export { ScrollRestoration } from "./scroll-restoration";
 
 export type { RemixServerProps } from "./server";
 export { RemixServer } from "./server";
-
-export type { Fetcher } from "./transition";
 
 export type {
   FutureConfig as UNSAFE_FutureConfig,
