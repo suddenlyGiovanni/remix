@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test";
 import globby from "globby";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
-import { createFixtureProject, js, css } from "./helpers/create-fixture";
+import type { FixtureInit } from "./helpers/create-fixture.js";
+import { createFixtureProject, js, css } from "./helpers/create-fixture.js";
 
 test("builds deterministically under different paths", async () => {
   // This test validates various flavors of remix virtual modules to ensure
@@ -24,15 +25,15 @@ test("builds deterministically under different paths", async () => {
   //  * serverEntryModulePlugin (implicitly tested by build)
   //  * serverRouteModulesPlugin (implicitly tested by build)
   //  * vanillaExtractPlugin (via app/routes/foo.tsx' .css.ts file import)
-  let init = {
-    future: {
-      unstable_cssModules: true,
-      unstable_cssSideEffectImports: true,
-      unstable_postcss: true,
-      unstable_vanillaExtract: true,
-      v2_routeConvention: true,
-    },
+  let init: FixtureInit = {
     files: {
+      "postcss.config.js": js`
+        export default {
+          plugins: {
+            "postcss-import": {},
+          },
+        };
+      `,
       "app/routes/_index.mdx": "# hello world",
       "app/routes/foo.tsx": js`
         export * from "~/foo/bar.server";
@@ -64,7 +65,7 @@ test("builds deterministically under different paths", async () => {
           <circle cx="50" cy="50" r="50" fill="coral" />
         </svg>
       `,
-      "app/styles/vanilla.css.ts": css`
+      "app/styles/vanilla.css.ts": js`
         import { style } from "@vanilla-extract/css";
         import { chocolate } from "./chocolate.css";
         import imageUrl from "~/images/foo.svg";
@@ -79,7 +80,7 @@ test("builds deterministically under different paths", async () => {
           }
         ]);
       `,
-      "app/styles/chocolate.css.ts": css`
+      "app/styles/chocolate.css.ts": js`
         import { style } from "@vanilla-extract/css";
 
         export const chocolate = style({

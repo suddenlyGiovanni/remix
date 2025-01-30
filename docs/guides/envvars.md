@@ -40,23 +40,25 @@ SOME_SECRET=super-secret
 
 Then, when running `remix dev` you will be able to access those values in your loaders/actions:
 
-```js
+```tsx
 export async function loader() {
   console.log(process.env.SOME_SECRET);
 }
 ```
 
-If you're using the `@remix-run/cloudflare-pages` adapter, env variables work a little differently. Since Cloudflare Pages are powered by Functions, you'll need to define your local environment variables in the [`.dev.vars`][dev-vars] file. It has the same syntax as `.env` example file mentioned above.
+If you're using the `@remix-run/cloudflare-pages` or `@remix-run/cloudflare` adapters, env variables work a little differently. You'll need to define your local environment variables in the [`.dev.vars`][dev-vars] file. It has the same syntax as `.env` example file mentioned above.
 
-Then, in your `loader` functions, you can access environment variables directly on `context`:
+Then, they'll be available via Remix's `context.cloudflare.env` in your `loader`/`action` functions:
 
 ```tsx
-export const loader = async ({ context }: LoaderArgs) => {
-  console.log(context.SOME_SECRET);
+export const loader = async ({
+  context,
+}: LoaderFunctionArgs) => {
+  console.log(context.cloudflare.env.SOME_SECRET);
 };
 ```
 
-Note that `.env` files are only for development. You should not use them in production, so Remix doesn't load them when running `remix serve`. You'll need to follow your host's guides on adding secrets to your production server, via the links below.
+Note that `.env` and `.dev.vars` files are only for development. You should not use them in production, so Remix doesn't load them when running `remix serve`. You'll need to follow your host's guides on adding secrets to your production server, via the links below.
 
 ### Production
 
@@ -164,4 +166,4 @@ Instead we recommend keeping all of your environment variables on the server (al
 [cloudflare-workers]: https://developers.cloudflare.com/workers/platform/environment-variables
 [vercel]: https://vercel.com/docs/environment-variables
 [architect]: https://arc.codes/docs/en/reference/cli/env
-[dev-vars]: https://developers.cloudflare.com/pages/platform/functions/#adding-environment-variables-locally
+[dev-vars]: https://developers.cloudflare.com/pages/functions/bindings/#interact-with-your-environment-variables-locally

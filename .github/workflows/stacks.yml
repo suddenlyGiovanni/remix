@@ -7,6 +7,10 @@ on:
         required: true
         type: string
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   setup:
     name: Remix Stacks Test
@@ -23,20 +27,17 @@ jobs:
           - repo: "remix-run/grunge-stack"
             name: "grunge"
     steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-
       - name: ⎔ Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
 
       - name: ⚒️ Create new ${{ matrix.stack.name }} app with ${{ inputs.version }}
         run: |
-          npx -y create-remix@${{ inputs.version }} ${{ matrix.stack.name }} --template ${{ matrix.stack.repo }} --typescript --no-install
+          npx -y create-remix@${{ inputs.version }} ${{ matrix.stack.name }} --template ${{ matrix.stack.repo }} --no-install --no-git-init
 
       - name: ⎔ Setup dependency caching
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           cache: npm
           cache-dependency-path: ${{ matrix.stack.name }}/package.json
@@ -59,7 +60,7 @@ jobs:
         run: zip ${{ matrix.stack.name }}.zip ./${{ matrix.stack.name }} -r -x "**/node_modules/*"
 
       - name: 🗄️ Archive ${{ matrix.stack.name }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.stack.name }}-archive
           path: ${{ matrix.stack.name }}.zip
@@ -80,11 +81,8 @@ jobs:
           - repo: "remix-run/grunge-stack"
             name: "grunge"
     steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-
       - name: 🗄️ Restore ${{ matrix.stack.name }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.stack.name }}-archive
 
@@ -92,9 +90,9 @@ jobs:
         run: unzip ${{ matrix.stack.name }}.zip
 
       - name: ⎔ Setup node and dependency caching
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: npm
           cache-dependency-path: ${{ matrix.stack.name }}/package.json
 
@@ -123,11 +121,8 @@ jobs:
           - repo: "remix-run/grunge-stack"
             name: "grunge"
     steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-
       - name: 🗄️ Restore ${{ matrix.stack.name }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.stack.name }}-archive
 
@@ -135,9 +130,9 @@ jobs:
         run: unzip ${{ matrix.stack.name }}.zip
 
       - name: ⎔ Setup node and dependency caching
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: npm
           cache-dependency-path: ${{ matrix.stack.name }}/package.json
 
@@ -166,11 +161,8 @@ jobs:
           - repo: "remix-run/grunge-stack"
             name: "grunge"
     steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-
       - name: 🗄️ Restore ${{ matrix.stack.name }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.stack.name }}-archive
 
@@ -178,9 +170,9 @@ jobs:
         run: unzip ${{ matrix.stack.name }}.zip
 
       - name: ⎔ Setup node and dependency caching
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: npm
           cache-dependency-path: ${{ matrix.stack.name }}/package.json
 
@@ -212,11 +204,8 @@ jobs:
             name: "grunge"
             cypress: "npm run dev"
     steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-
       - name: 🗄️ Restore ${{ matrix.stack.name }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.stack.name }}-archive
 
@@ -224,9 +213,9 @@ jobs:
         run: unzip ${{ matrix.stack.name }}.zip
 
       - name: ⎔ Setup node and dependency caching
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: npm
           cache-dependency-path: ${{ matrix.stack.name }}/package.json
 
@@ -255,7 +244,7 @@ jobs:
           npm run build
 
       - name: 🌳 Cypress run
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           start: ${{ matrix.stack.cypress }}
           wait-on: "http://localhost:8811"
