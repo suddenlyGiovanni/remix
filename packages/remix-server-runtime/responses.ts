@@ -1,16 +1,24 @@
 import {
   defer as routerDefer,
+  json as routerJson,
+  redirect as routerRedirect,
+  replace as routerReplace,
+  redirectDocument as routerRedirectDocument,
   type UNSAFE_DeferredData as DeferredData,
   type TrackedPromise,
 } from "@remix-run/router";
 
 import { serializeError } from "./errors";
+import type { ServerMode } from "./mode";
+
+declare const typedDeferredDataBrand: unique symbol;
 
 export type TypedDeferredData<Data extends Record<string, unknown>> = Pick<
   DeferredData,
   "init"
 > & {
   data: Data;
+  readonly [typedDeferredDataBrand]: "TypedDeferredData";
 };
 
 export type DeferFunction = <Data extends Record<string, unknown>>(
@@ -18,17 +26,14 @@ export type DeferFunction = <Data extends Record<string, unknown>>(
   init?: number | ResponseInit
 ) => TypedDeferredData<Data>;
 
-export type JsonFunction = <Data extends unknown>(
+export type JsonFunction = <Data>(
   data: Data,
   init?: number | ResponseInit
 ) => TypedResponse<Data>;
 
 // must be a type since this is a subtype of response
 // interfaces must conform to the types they extend
-export type TypedResponse<T extends unknown = unknown> = Omit<
-  Response,
-  "json"
-> & {
+export type TypedResponse<T = unknown> = Omit<Response, "json"> & {
   json(): Promise<T>;
 };
 
@@ -36,40 +41,28 @@ export type TypedResponse<T extends unknown = unknown> = Omit<
  * This is a shortcut for creating `application/json` responses. Converts `data`
  * to JSON and sets the `Content-Type` header.
  *
+ * @deprecated This utility is deprecated in favor of opting into Single Fetch
+ * via `future.v3_singleFetch` and returning raw objects.  This method will be
+ * removed in React Router v7.  If you need to return a JSON Response, you can
+ * use `Response.json()`.
+ *
  * @see https://remix.run/utils/json
  */
 export const json: JsonFunction = (data, init = {}) => {
-  let responseInit = typeof init === "number" ? { status: init } : init;
-
-  let headers = new Headers(responseInit.headers);
-  if (!headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json; charset=utf-8");
-  }
-
-  return new Response(JSON.stringify(data), {
-    ...responseInit,
-    headers,
-  });
+  return routerJson(data, init);
 };
 
 /**
- * This is a shortcut for creating `application/json` responses. Converts `data`
- * to JSON and sets the `Content-Type` header.
+ * This is a shortcut for creating Remix deferred responses
  *
- * @see https://remix.run/api/remix#json
+ * @deprecated This utility is deprecated in favor of opting into Single Fetch
+ * via `future.v3_singleFetch` and returning raw objects.  This method will be
+ * removed in React Router v7.
+ *
+ * @see https://remix.run/utils/defer
  */
 export const defer: DeferFunction = (data, init = {}) => {
-  let responseInit = typeof init === "number" ? { status: init } : init;
-
-  let headers = new Headers(responseInit.headers);
-  if (!headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json; charset=utf-8");
-  }
-
-  return routerDefer(data, {
-    ...responseInit,
-    headers,
-  }) as TypedDeferredData<typeof data>;
+  return routerDefer(data, init) as unknown as TypedDeferredData<typeof data>;
 };
 
 export type RedirectFunction = (
@@ -84,20 +77,28 @@ export type RedirectFunction = (
  * @see https://remix.run/utils/redirect
  */
 export const redirect: RedirectFunction = (url, init = 302) => {
-  let responseInit = init;
-  if (typeof responseInit === "number") {
-    responseInit = { status: responseInit };
-  } else if (typeof responseInit.status === "undefined") {
-    responseInit.status = 302;
-  }
+  return routerRedirect(url, init) as TypedResponse<never>;
+};
 
-  let headers = new Headers(responseInit.headers);
-  headers.set("Location", url);
+/**
+ * A redirect response. Sets the status code and the `Location` header.
+ * Defaults to "302 Found".
+ *
+ * @see https://remix.run/utils/redirect
+ */
+export const replace: RedirectFunction = (url, init = 302) => {
+  return routerReplace(url, init) as TypedResponse<never>;
+};
 
-  return new Response(null, {
-    ...responseInit,
-    headers,
-  }) as TypedResponse<never>;
+/**
+ * A redirect response that will force a document reload to the new location.
+ * Sets the status code and the `Location` header.
+ * Defaults to "302 Found".
+ *
+ * @see https://remix.run/utils/redirect
+ */
+export const redirectDocument: RedirectFunction = (url, init = 302) => {
+  return routerRedirectDocument(url, init) as TypedResponse<never>;
 };
 
 export function isDeferredData(value: any): value is DeferredData {
@@ -142,7 +143,8 @@ function isTrackedPromise(value: any): value is TrackedPromise {
 const DEFERRED_VALUE_PLACEHOLDER_PREFIX = "__deferred_promise:";
 export function createDeferredReadableStream(
   deferredData: DeferredData,
-  signal: AbortSignal
+  signal: AbortSignal,
+  serverMode: ServerMode
 ): any {
   let encoder = new TextEncoder();
   let stream = new ReadableStream({
@@ -172,7 +174,8 @@ export function createDeferredReadableStream(
           controller,
           encoder,
           preresolvedKey,
-          deferredData.data[preresolvedKey] as TrackedPromise
+          deferredData.data[preresolvedKey] as TrackedPromise,
+          serverMode
         );
       }
 
@@ -182,7 +185,8 @@ export function createDeferredReadableStream(
             controller,
             encoder,
             settledKey,
-            deferredData.data[settledKey] as TrackedPromise
+            deferredData.data[settledKey] as TrackedPromise,
+            serverMode
           );
         }
       });
@@ -199,14 +203,18 @@ function enqueueTrackedPromise(
   controller: any,
   encoder: TextEncoder,
   settledKey: string,
-  promise: TrackedPromise
+  promise: TrackedPromise,
+  serverMode: ServerMode
 ) {
   if ("_error" in promise) {
     controller.enqueue(
       encoder.encode(
         "error:" +
           JSON.stringify({
-            [settledKey]: serializeError(promise._error),
+            [settledKey]:
+              promise._error instanceof Error
+                ? serializeError(promise._error, serverMode)
+                : promise._error,
           }) +
           "\n\n"
       )

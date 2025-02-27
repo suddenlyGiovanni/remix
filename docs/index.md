@@ -8,63 +8,51 @@ hidden: true
 
 # Remix Docs
 
-## Getting Started
+<docs-warning>Just getting started with Remix? The latest version of [Remix is now React Router v7][remix-now-react-router]. If you want to use the latest framework features, you should use the [React Router docs to get started][react-router-get-started].</docs-warning>
 
-```sh
+```shellscript nonumber
 npx create-remix@latest
 ```
 
-We **strongly encourage you** to do one of the tutorials before anything else. Remix is different. The tutorials will show you how to start with web fundamentals and then progressively enhance your app to the modern UX you're after.
-
 <docs-cards>
-  <a href="v1/tutorials/blog" aria-label="Developer Blog Tutorial">
+  <a href="/discussion/introduction" aria-label="Technical Explanation">
     <docs-card>
-      <h4>Quickstart</h4>
-      <p>Spend your first few minutes with Remix here and let us introduce some of the core features as quickly as possible. After this you can go explore the docs or dive deeper with the other tutorials. We'll build a little markdown blog with data loading, actions, form validation, redirects, and more.</p>
+      <h4 class="text-blue-brand">I'm just curious...</h4>
+      <p>Start with the <span style="text-decoration:underline">Technical Explanation</span>. Remix is a new kind of web framework that we like to call "centerstack". It blends old and new web development models in a unique way that deserves some explanation!</p>
     </docs-card>
   </a>
-  <a href="v1/tutorials/jokes" aria-label="Jokes App Tutorial">
+  <a href="/start/tutorial" aria-label="Developer Blog Tutorial">
     <docs-card>
-      <h4>Jokes App Deep Dive</h4> 
-      <p>Dive deep into Remix and full stack development with this app. It's backed by a SQL database, user authentication and session, and of course some modern UI finishes. You'll learn about nested routes, sessions, data loading, data mutations, progressive enhancement, and more. Get a feel for what a data-backed web app feels like with Remix.</p>
+      <h4 class="text-green-brand">I want to try it out...</h4>
+      <p>Spend your first few minutes with Remix in the <span style="text-decoration:underline">Tutorial</span>. It introduces the core features as quickly as possible building a little contact management app. You'll see data loading, actions, form validation, search, redirects, and more.</p>
     </docs-card>
   </a>
-  <a href="v1/api/conventions" aria-label="Conventional APIs">
+  <a href="/discussion/runtimes" aria-label="Runtimes, Adapters, Stacks, and Deployment">
     <docs-card>
-      <h4>Conventional APIs</h4> 
-      <p>Remix has a handful of conventions to make web application development a breeze. You'll spend some time in this document when you're first learning Remix, but probably won't need it much after you get your feet wet.</p>
+      <h4 class="text-pink-brand">I'm in, let's go.</h4>
+      <p>The <b>Discussions</b> will help you get a deep understanding of Remix. Get yourself a drink and some snacks then dive deep into building better web apps with Remix.</p>
     </docs-card>
   </a>
-  <a href="v1/api/remix" aria-label="Remix API">
+  <a href="/start/community" aria-label="Remix API">
     <docs-card>
-      <h4>Remix Package API</h4>
-      <p>This is probably the doc page you'll visit the most. It's got all of the Remix package exports that you'll use day-to-day in your app.</p>
+      <h4 class="text-red-brand">I'm stuck!</h4>
+      <p>Need help? Want to contribute? Remix is developed in the open with a helpful community. Come and see where to find us on the <b>Community</b> page, follow along with Remix development, get help, and contribute back!</p>
     </docs-card>
   </a>
 </docs-cards>
 
-## Community
+<!--
 
-<docs-cards>
-  <a href="https://rmx.as/github" aria-label="GitHub Repository">
-    <docs-card>
-      <h4>GitHub Repository</h4>
-      <p>Follow along and contribute to the development of Remix. We actually love typo PRs.</p>
-      <p>GitHub Discussions is also the best place to get help when you're stuck. Other folks can post answers for the next person to see.</p>
-    </docs-card>
-  </a>
-  <a href="https://github.com/remix-run/examples" aria-label="Remix Examples">
-    <docs-card>
-      <h4>Remix Examples</h4>
-      <p>Have a look at the various Remix examples made by the community and carefully reviewed by our team.</p>
-    </docs-card>
-  </a>
-  <a href="https://rmx.as/discord" aria-label="Remix Discord">
-    <docs-card>
-      <h4>Discord Server</h4> 
-      <p>Join our awesome community of developers for realtime discussion, help, and showing off what you built! Good vibes only.</p>
-    </docs-card>
-  </a>
-</docs-cards>
+{Add this when I'm done moving things around}
 
-[git-hub]: https://github.com/remix-run/remix
+## How to Use These Docs
+
+- **Tutorials**: These are step-by-step guides that walk you through building a specific app. They're great for getting started with Remix and learning the basics.
+- **Discussions**: These help you understand Remix by diving into a topic and how various APIs work together to meet use cases or explain some behavior that might not be obvious just from the API.
+- **Reference**: These are the docs for the APIs and conventions that Remix provides. They're great for looking up how to use a specific API or feature but don't contain a lot of conversation about how to use them together.
+- **Guides**: They're great for learning how to use Remix in a specific way or for a specific use case.
+
+-->
+
+[remix-now-react-router]: https://remix.run/blog/incremental-path-to-react-19
+[react-router-get-started]: https://reactrouter.com/start/framework/installation

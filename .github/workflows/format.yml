@@ -6,34 +6,41 @@ on:
       - main
       - dev
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   format:
     if: github.repository == 'remix-run/remix'
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.FORMAT_PAT }}
 
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4.0.0
+
       - name: ⎔ Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-          cache: "yarn"
+          cache: "pnpm"
 
       - name: 📥 Install deps
-        run: yarn --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: 🔗 Convert Docs links to references
         run: node scripts/markdown-references.mjs
 
+      - name: 🔃 Sort contributors.yml
+        run: sort --ignore-case --output contributors.yml contributors.yml
+
       - name: 👔 Format
-        run: yarn format
+        run: pnpm format
 
       - name: 🦕 Install Deno
         uses: denoland/setup-deno@v1
@@ -41,7 +48,7 @@ jobs:
           deno-version: vx.x.x
 
       - name: 👔 Format Deno files
-        run: yarn format:deno
+        run: pnpm format:deno
 
       - name: 💪 Commit
         run: |

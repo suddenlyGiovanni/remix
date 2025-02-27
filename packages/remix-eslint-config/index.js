@@ -14,6 +14,13 @@ const reactSettings = require("./settings/react");
  */
 require("@rushstack/eslint-patch/modern-module-resolution");
 
+console.warn(
+  "⚠️ REMIX FUTURE CHANGE: The `@remix-run/eslint-config` package is deprecated " +
+    "and will not be included in React Router v7.  We recommend moving towards a " +
+    "streamlined ESLint config such as the ones included in the Remix templates. " +
+    "See https://github.com/remix-run/remix/blob/main/templates/remix/.eslintrc.cjs."
+);
+
 const OFF = 0;
 // const WARN = 1;
 // const ERROR = 2;
@@ -62,15 +69,14 @@ const config = {
   overrides: [
     {
       files: ["**/*.ts?(x)"],
-      extends: ["plugin:import/typescript"],
+      extends: [
+        "plugin:import/typescript",
+        "plugin:@typescript-eslint/recommended",
+      ],
       parser: "@typescript-eslint/parser",
       parserOptions: {
         sourceType: "module",
         ecmaVersion: 2019,
-        ecmaFeatures: {
-          jsx: true,
-        },
-        warnOnUnsupportedTypeScriptVersion: true,
       },
       plugins: ["@typescript-eslint"],
       rules: {
@@ -78,7 +84,12 @@ const config = {
       },
     },
     {
-      files: ["**/routes/**/*.js?(x)", "**/routes/**/*.tsx"],
+      files: [
+        "**/routes/**/*.js?(x)",
+        "**/routes/**/*.tsx",
+        "app/root.js?(x)",
+        "app/root.tsx",
+      ],
       rules: {
         // Routes may use default exports without a name. At the route level
         // identifying components for debugging purposes is less of an issue, as
